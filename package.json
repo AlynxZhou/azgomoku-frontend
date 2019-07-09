@@ -29,5 +29,16 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "keywords": [
+    "Gomoku"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlynxZhou/azgomoku-frontend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlynxZhou/azgomoku-frontend/issues"
+  },
+  "homepage": "https://github.com/AlynxZhou/azgomoku-frontend#readme"
 }
