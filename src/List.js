@@ -1,7 +1,12 @@
 import React from 'react'
 import './List.css'
-import {Link} from "react-router-dom"
-import AppContext from './AppContext'
+import Status from './Status'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import TableCell from '@material-ui/core/TableCell'
+import TableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Button from '@material-ui/core/Button'
 
 class List extends React.Component {
   constructor(props) {
@@ -11,42 +16,81 @@ class List extends React.Component {
     }
   }
   componentDidMount() {
-    const {socket, wid} = this.context
-    this.setState({'wid': wid})
+    const {socket, wid} = this.props.getAppState()
     socket.on('list', (msg) => {
-      console.log(msg)
-      this.setState(JSON.parse(msg))
+      const data = JSON.parse(msg)
+      const {sessions} = data
+      this.setState({sessions})
     })
-    socket.emit('list', JSON.stringify({'wid': wid}))
+    socket.emit('list', JSON.stringify({wid}))
   }
-  onButtonClick() {
-    const {socket, wid} = this.context
+  onNewButtonClick() {
+    const {socket, wid} = this.props.getAppState()
     socket.on('session', (msg) => {
       const data = JSON.parse(msg)
-      this.props.history.push(`/session/${data.sid}`)
+      const {sid} = data
+      this.props.setAppState({'status': Status.SESSION_JOIN, sid})
     })
-    socket.emit('session', JSON.stringify({'wid': wid}))
+    socket.emit('session', JSON.stringify({wid}))
   }
-  renderList(session) {
+  onJoinButtonClick(sid) {
+    this.props.setAppState({'status': Status.SESSION_JOIN, sid})
+  }
+  onWatchButtonClick(sid) {
+    this.props.setAppState({'status': Status.SESSION_WATCH, sid})  
+  }
+  renderSession(session) {
     return (
-      <li>
-        sid: {session.sid}, numbers: {session.watchersLength}, <Link to={`/session/${session.sid}`}>join</Link>
-      </li>
+      <TableRow key={session.sid}>
+        <TableCell component="th" scope="row">{session.sid}</TableCell>
+        <TableCell align="right">{session.wids.length}</TableCell>
+        <TableCell align="right">
+          {session.canJoin
+            ? <Button variant="contained"
+                color="primary"
+                onClick={() => {
+                  this.onJoinButtonClick(session.sid)
+                }}>
+                Join
+              </Button>
+            : ''}
+          <br />
+          <Button variant="contained"
+            color="primary"
+            onClick={() => {
+              this.onWatchButtonClick(session.sid)
+            }}>
+            Watch
+          </Button>
+        </TableCell>
+      </TableRow>
     )
   }
   render() {
     return (
       <div className='list'>
-        <span>Session List</span>
-        <ul>
-          {this.state.sessions.map(this.renderList.bind(this))}
-        </ul>
-        <button onClick={this.onButtonClick.bind(this)}>New</button>
+        <h1>Session List</h1>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.onNewButtonClick.bind(this)}>
+          New
+        </Button>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Session ID</TableCell>
+              <TableCell align="right">Watchers Number</TableCell>
+              <TableCell align="right">Operation</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {this.state.sessions.map(this.renderSession.bind(this))}
+          </TableBody>
+        </Table>
       </div>
     )
   }
 }
-
-List.contextType = AppContext
 
 export default List

@@ -1,60 +1,53 @@
 import React from 'react'
-import {BrowserRouter as Router, Route} from 'react-router-dom'
-import io from 'socket.io-client'
 import './App.css'
+import Status from './Status'
+import Launch from './Launch'
 import List from './List'
 import Session from './Session'
-import AppContext from './AppContext'
+import Container from '@material-ui/core/Container'
 
 class App extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = {
+			'status': Status.LAUNCH,
 			'socket': null,
+			'server': null,
 			'wid': null,
-			'isConnected': false,
-			'isConnecting': false,
-			'isBusy': false
+			'sid': null
+		}
+		this.passProps = {
+			'getAppState': this.getAppState.bind(this),
+			'setAppState': this.setAppState.bind(this)
 		}
 	}
-	componentDidMount() {
-		this.setState({'isConnecting': true})
-		const socket = io('http://localhost:3003')
-		socket.on('connected', (msg) => {
-			const data = JSON.parse(msg)
-			const {wid} = data
-			this.setState({
-				'socket': socket,
-				'wid': wid,
-				'isConnecting': false,
-				'isConnected': true
-			})
-		})
+	getAppState() {
+		return this.state
+	}
+	setAppState(obj) {
+		return this.setState(obj)
 	}
 	renderContent() {
-		if (!this.state.isConnected) {
-			return (
-				<span>Loading</span>
-			)
+		switch (this.state.status) {
+			case Status.LIST:
+				return <List {...this.passProps} />
+			case Status.SESSION_CREATE:
+				return <Session {...this.passProps} />
+			case Status.SESSION_JOIN:
+				return <Session isWatching={false} {...this.passProps} />
+			case Status.SESSION_WATCH:
+				return <Session isWatching={true} {...this.passProps} />
+			default:
+				return <Launch {...this.passProps} />
 		}
-		return (
-			<AppContext.Provider value={{
-				'socket': this.state.socket,
-				'wid': this.state.wid
-			}}>
-				<Router>
-					<Route path="/session/:sid" component={Session} />
-					<Route path="/session" exact component={Session} />
-					<Route path="/" exact component={List} />
-				</Router>
-			</AppContext.Provider>
-		)
 	}
 	render() {
 		return (
-			<div className="app">
-				{this.renderContent()}
-			</div>
+			<Container maxWidth="md">
+				<div className="app">
+					{this.renderContent()}
+				</div>
+			</Container>
 		)
 	}
 }
