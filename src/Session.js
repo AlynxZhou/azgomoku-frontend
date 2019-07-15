@@ -76,7 +76,6 @@ class Session extends React.Component {
   componentDidMount() {
     const {socket, wid, sid} = this.props.getAppState()
     socket.on('map', (msg) => {
-      console.log(msg)
       const data = JSON.parse(msg)
       this.setState(data)
     })
