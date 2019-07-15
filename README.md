@@ -1,3 +1,17 @@
+AZGomoku Frontend
+=================
+
+# Usage
+
+```
+$ npm install
+$ npm start
+```
+
+You can visit those pages at <https://localhost:3000/>, however if you want to play you need to enter a server address. You can run [AZGomoku-Backend](https://github.com/AlynxZhou/azgomoku-backend/) by yourself and the server will listen at `localhost:3003`.
+
+-----------------------------
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
